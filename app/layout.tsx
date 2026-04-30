@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
   title: 'FirstMove — Turn ideas into execution plans',
-  description: 'Save time. Make the first move.',
+  description: "Don't overthink. Make the first move.",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

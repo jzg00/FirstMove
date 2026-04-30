@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import { BriefOutput, IdeaType } from '@/lib/types'
 
 interface OutputPanelProps {
@@ -24,7 +24,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
   const [removed, setRemoved] = useState<Set<string>>(new Set())
   const [texts, setTexts] = useState<Record<string, string>>({})
   const [reloading, setReloading] = useState<Set<string>>(new Set())
-  const [editing, setEditing] = useState<{ key: string; draft: string } | null>(null)
+  const [editing, setEditing] = useState<{ key: string; draft: string; baseline: string } | null>(null)
   const [added, setAdded] = useState<Record<SectionKey, string[]>>(EMPTY_ADDED)
   const [addingSection, setAddingSection] = useState<SectionKey | null>(null)
   const [addDraft, setAddDraft] = useState('')
@@ -34,6 +34,9 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
   const [copied, setCopied] = useState<'markdown' | 'plain' | null>(null)
   const shareRef = useRef<HTMLDivElement>(null)
   const briefRef = useRef<HTMLDivElement>(null)
+  const editSurfaceRef = useRef<HTMLElement | null>(null)
+  const editingStateRef = useRef<{ key: string; draft: string; baseline: string } | null>(null)
+  editingStateRef.current = editing
 
   useEffect(() => {
     setPrioritized(new Set())
@@ -72,6 +75,28 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
     document.addEventListener('mousedown', onDocMouseDown)
     return () => document.removeEventListener('mousedown', onDocMouseDown)
   }, [addingSection])
+
+  useEffect(() => {
+    if (!editing) return
+    function onDocMouseDown(e: MouseEvent) {
+      const surface = editSurfaceRef.current
+      if (surface?.contains(e.target as Node)) return
+      const cur = editingStateRef.current
+      if (!cur) return
+      const d = cur.draft.trim()
+      const b = cur.baseline.trim()
+      if (d === b) {
+        setEditing(null)
+      } else if (d) {
+        setTexts((prev) => ({ ...prev, [cur.key]: d }))
+        setEditing(null)
+      } else {
+        setEditing(null)
+      }
+    }
+    document.addEventListener('mousedown', onDocMouseDown)
+    return () => document.removeEventListener('mousedown', onDocMouseDown)
+  }, [editing ? 1 : 0])
 
   // --- Brief serialization ---
 
@@ -266,7 +291,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
 
   function handleEdit(key: string, currentText: string) {
     setAddingSection(null)
-    setEditing({ key, draft: currentText })
+    setEditing({ key, draft: currentText, baseline: currentText })
   }
 
   function handleSaveEdit() {
@@ -341,6 +366,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
           {allItems.map((item, displayIdx) => (
             <EditableItem
               key={item.key}
+              editSurfaceRef={editSurfaceRef}
               isPrioritized={prioritized.has(item.key)}
               isReloading={reloading.has(item.key)}
               isEditing={editing?.key === item.key}
@@ -486,7 +512,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
         ) : null
       }>
         {isEditingCoreProblem ? (
-          <div className="flex flex-col gap-2">
+          <div ref={editSurfaceRef} className="flex flex-col gap-2">
             <textarea
               autoFocus
               value={editing!.draft}
@@ -691,7 +717,8 @@ function ShareMenuItem({ icon, label, checked, onClick }: { icon: React.ReactNod
 
 // --- EditableItem ---
 
-function EditableItem({ isPrioritized, isReloading, isEditing, editDraft, onPrioritize, onRemove, onReload, onEdit, onDraftChange, onSave, onCancelEdit, prefix, children }: {
+function EditableItem({ editSurfaceRef, isPrioritized, isReloading, isEditing, editDraft, onPrioritize, onRemove, onReload, onEdit, onDraftChange, onSave, onCancelEdit, prefix, children }: {
+  editSurfaceRef: RefObject<HTMLElement | null>
   isPrioritized: boolean; isReloading: boolean; isEditing: boolean; editDraft: string
   onPrioritize: () => void; onRemove: () => void; onReload: () => void; onEdit: () => void
   onDraftChange: (v: string) => void; onSave: () => void; onCancelEdit: () => void
@@ -699,7 +726,7 @@ function EditableItem({ isPrioritized, isReloading, isEditing, editDraft, onPrio
 }) {
   if (isEditing) {
     return (
-      <li className="flex items-start gap-2 rounded-xl border border-sage-300 bg-white px-3 py-2.5 my-0.5">
+      <li ref={editSurfaceRef} className="flex items-start gap-2 rounded-xl border border-sage-300 bg-white px-3 py-2.5 my-0.5">
         <span className="mt-1 opacity-40">{prefix}</span>
         <div className="flex-1 flex flex-col gap-2">
           <textarea
