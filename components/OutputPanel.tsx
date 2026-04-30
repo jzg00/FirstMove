@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, type RefObject } from 'react'
+import { useEffect, useRef, useState, type MutableRefObject, type RefObject } from 'react'
 import { BriefOutput, IdeaType } from '@/lib/types'
 
 interface OutputPanelProps {
@@ -512,7 +512,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
         ) : null
       }>
         {isEditingCoreProblem ? (
-          <div ref={editSurfaceRef} className="flex flex-col gap-2">
+          <div ref={(el) => { editSurfaceRef.current = el }} className="flex flex-col gap-2">
             <textarea
               autoFocus
               value={editing!.draft}
@@ -718,7 +718,7 @@ function ShareMenuItem({ icon, label, checked, onClick }: { icon: React.ReactNod
 // --- EditableItem ---
 
 function EditableItem({ editSurfaceRef, isPrioritized, isReloading, isEditing, editDraft, onPrioritize, onRemove, onReload, onEdit, onDraftChange, onSave, onCancelEdit, prefix, children }: {
-  editSurfaceRef: RefObject<HTMLElement | null>
+  editSurfaceRef: MutableRefObject<HTMLElement | null>
   isPrioritized: boolean; isReloading: boolean; isEditing: boolean; editDraft: string
   onPrioritize: () => void; onRemove: () => void; onReload: () => void; onEdit: () => void
   onDraftChange: (v: string) => void; onSave: () => void; onCancelEdit: () => void
@@ -726,7 +726,7 @@ function EditableItem({ editSurfaceRef, isPrioritized, isReloading, isEditing, e
 }) {
   if (isEditing) {
     return (
-      <li ref={editSurfaceRef} className="flex items-start gap-2 rounded-xl border border-sage-300 bg-white px-3 py-2.5 my-0.5">
+      <li ref={(el) => { editSurfaceRef.current = el }} className="flex items-start gap-2 rounded-xl border border-sage-300 bg-white px-3 py-2.5 my-0.5">
         <span className="mt-1 opacity-40">{prefix}</span>
         <div className="flex-1 flex flex-col gap-2">
           <textarea
