@@ -76,9 +76,6 @@ export default function InputPanel({
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div>
-        <p className="text-sm font-medium text-sage-600 uppercase tracking-widest mb-1">
-          Idea Input
-        </p>
         <h2 className="text-xl font-semibold text-gray-900">
           Describe your idea
         </h2>
@@ -109,21 +106,50 @@ export default function InputPanel({
         </div>
       </div>
 
-      {/* Textarea */}
-      <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-          Your Idea
-        </label>
-        <textarea
-          value={idea}
-          onChange={(e) => onIdeaChange(e.target.value)}
-          rows={7}
-          placeholder="e.g. We need a way to turn rough product ideas into structured briefs so the team can move faster…"
-          className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent resize-none transition"
-        />
-        <p className="text-xs text-gray-400 mt-1.5 text-right">
-          {idea.length} chars
-        </p>
+      {/* Textarea + primary CTA */}
+      <div className="flex flex-col gap-3">
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+            Your Idea
+          </label>
+          <textarea
+            value={idea}
+            onChange={(e) => onIdeaChange(e.target.value)}
+            rows={7}
+            placeholder="e.g. We need a way to turn rough product ideas into structured briefs so the team can move faster…"
+            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent resize-none transition"
+          />
+          <p className="text-xs text-gray-400 mt-1.5 text-right">
+            {idea.length} chars
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={!idea.trim() || loading}
+          className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-sage-600 hover:bg-sage-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold px-6 py-3.5 text-sm transition-all duration-150 shadow-sm hover:shadow-md disabled:shadow-none"
+        >
+          {loading ? (
+            <>
+              <LoadingSpinner />
+              Generating…
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M3 8h10M9 4l4 4-4 4"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Generate First Move
+            </>
+          )}
+        </button>
       </div>
 
       {/* Examples */}
@@ -135,6 +161,7 @@ export default function InputPanel({
           {examples.map((ex) => (
             <button
               key={ex.label}
+              type="button"
               onClick={() => onIdeaChange(ex.text)}
               className="text-left px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white hover:bg-sage-50 hover:border-sage-300 transition-all duration-150 group"
             >
@@ -148,33 +175,6 @@ export default function InputPanel({
           ))}
         </div>
       </div>
-
-      {/* CTA */}
-      <button
-        onClick={onSubmit}
-        disabled={!idea.trim() || loading}
-        className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-sage-600 hover:bg-sage-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold px-6 py-3.5 text-sm transition-all duration-150 shadow-sm hover:shadow-md disabled:shadow-none"
-      >
-        {loading ? (
-          <>
-            <LoadingSpinner />
-            Generating…
-          </>
-        ) : (
-          <>
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M3 8h10M9 4l4 4-4 4"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Generate First Move
-          </>
-        )}
-      </button>
     </div>
   )
 }

@@ -33,6 +33,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
   const [shareOpen, setShareOpen] = useState(false)
   const [copied, setCopied] = useState<'markdown' | 'plain' | null>(null)
   const shareRef = useRef<HTMLDivElement>(null)
+  const briefRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setPrioritized(new Set())
@@ -59,6 +60,18 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
     document.addEventListener('mousedown', onOutsideClick)
     return () => document.removeEventListener('mousedown', onOutsideClick)
   }, [shareOpen])
+
+  useEffect(() => {
+    if (addingSection === null) return
+    function onDocMouseDown(e: MouseEvent) {
+      if (briefRef.current && !briefRef.current.contains(e.target as Node)) {
+        setAddingSection(null)
+        setAddDraft('')
+      }
+    }
+    document.addEventListener('mousedown', onDocMouseDown)
+    return () => document.removeEventListener('mousedown', onDocMouseDown)
+  }, [addingSection])
 
   // --- Brief serialization ---
 
@@ -400,7 +413,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
   const isEditingCoreProblem = editing?.key === 'coreProblem'
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={briefRef} className="flex flex-col gap-3">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
@@ -497,8 +510,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
       <div className="rounded-xl border-2 border-sage-300 bg-sage-50 p-5">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-sage-600"><MoveIcon /></span>
-          <h3 className="text-xs font-bold text-sage-700 uppercase tracking-widest flex-1">First Move</h3>
-          <span className="text-[10px] font-semibold text-sage-500 bg-sage-100 px-2 py-0.5 rounded-full">This week</span>
+          <h3 className="text-xs font-bold text-sage-700 uppercase tracking-widest">First Move</h3>
         </div>
         {renderSection('firstMove', output.firstMove, () => <MovePrefix />)}
         <RemovedItemsRestoreDropdown

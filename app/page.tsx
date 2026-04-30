@@ -103,11 +103,7 @@ export default function Home() {
               ideaType={ideaType}
               loading={loading}
               onIdeaChange={setIdea}
-              onTypeChange={(t) => {
-                setIdeaType(t)
-                setIdea('')
-                setOutput(null)
-              }}
+              onTypeChange={setIdeaType}
               onSubmit={handleGenerate}
             />
           </div>
