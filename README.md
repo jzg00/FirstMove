@@ -2,25 +2,17 @@
 
 **Don't overthink. Make the first move.**
 
-FirstMove is built for ops leads, team leads, and executives who need to move fast — not spend hours turning a half-formed idea into something their team can actually act on. Describe what you're thinking, get back an execution-ready brief in seconds, and walk into the next conversation with a plan.
+FirstMove turns a rough idea into an execution-ready brief in seconds. Describe what you're thinking — in plain language, no structure required — and get back a clear problem framing, a concrete first move, and the next steps to keep momentum going.
 
 ---
 
 ## The problem it solves
 
-In fast-moving operations teams, the bottleneck is rarely the idea. It's the space between "we need to fix this" and "here's what we're doing about it." That space fills up with planning sessions, alignment meetings, framing debates, and the particular kind of inertia that sets in when everyone's waiting for someone else to structure the problem first.
+Most ideas don't die from lack of merit. They die in the space between "we should do something about this" and "here's what we're actually doing." That space is filled with scheduling planning sessions, arguing about framing, debating priorities, and — most often — just not knowing where to start.
 
-Analysis paralysis is expensive at the individual level. At the team and company level, it compounds. Every week an ops improvement sits in a Notion doc waiting to become a real plan is a week of inefficiency, cost, or customer friction that didn't need to happen.
+Analysis paralysis is expensive. The more options you have, the longer the delay. The longer the delay, the more likely the idea gets deprioritized, lost, or quietly abandoned.
 
 FirstMove removes that gap. You put in the idea as it exists in your head. You get out something your team can run with.
-
----
-
-## Who it's for
-
-- **Operations leaders** managing complex, cross-functional processes who need to move from problem to plan without a two-day offsite
-- **Executives** who spot inefficiencies or opportunities but don't have time to write the brief themselves
-- **Team leads** who want to bring a structured proposal to leadership, not just a complaint or a vague suggestion
 
 ---
 
