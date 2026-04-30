@@ -40,8 +40,8 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       {/* Nav */}
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+        <div className="relative max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+          <div className="relative z-10 flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-sage-600 flex items-center justify-center">
               <svg className="w-4 h-4 text-white" viewBox="0 0 16 16" fill="none">
                 <path
@@ -57,10 +57,10 @@ export default function Home() {
               FirstMove
             </span>
           </div>
-          <p className="text-xs text-gray-400 hidden sm:block">
+          <p className="pointer-events-none absolute left-1/2 top-1/2 hidden max-w-[min(20rem,calc(100%-11rem))] -translate-x-1/2 -translate-y-1/2 text-center text-xs text-gray-400 sm:block">
             Save time. Make the first move.
           </p>
-          <div className="flex items-center gap-1.5">
+          <div className="relative z-10 flex items-center gap-1.5">
             <span className="inline-flex items-center gap-1 rounded-full bg-sage-50 border border-sage-200 px-2.5 py-0.5 text-[11px] font-semibold text-sage-700">
               <span className="w-1.5 h-1.5 rounded-full bg-sage-500 inline-block" />
               MVP

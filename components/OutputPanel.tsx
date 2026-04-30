@@ -12,12 +12,15 @@ interface OutputPanelProps {
 
 type SectionKey = 'firstMove' | 'nextSteps' | 'risks'
 
+/** Sections that can be removed entirely from the brief (hidden + omitted from export). */
+type BriefSectionOmit = 'nextSteps' | 'risks'
+
 const EMPTY_ADDED: Record<SectionKey, string[]> = {
   firstMove: [], nextSteps: [], risks: [],
 }
 
 export default function OutputPanel({ output, loading, ideaType, idea }: OutputPanelProps) {
-  const [highlighted, setHighlighted] = useState<Set<string>>(new Set())
+  const [prioritized, setPrioritized] = useState<Set<string>>(new Set())
   const [removed, setRemoved] = useState<Set<string>>(new Set())
   const [texts, setTexts] = useState<Record<string, string>>({})
   const [reloading, setReloading] = useState<Set<string>>(new Set())
@@ -26,12 +29,13 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
   const [addingSection, setAddingSection] = useState<SectionKey | null>(null)
   const [addDraft, setAddDraft] = useState('')
   const [generatingSection, setGeneratingSection] = useState<SectionKey | null>(null)
+  const [omittedSections, setOmittedSections] = useState<Set<BriefSectionOmit>>(new Set())
   const [shareOpen, setShareOpen] = useState(false)
   const [copied, setCopied] = useState<'markdown' | 'plain' | null>(null)
   const shareRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setHighlighted(new Set())
+    setPrioritized(new Set())
     setRemoved(new Set())
     setTexts({})
     setReloading(new Set())
@@ -40,6 +44,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
     setAddingSection(null)
     setAddDraft('')
     setGeneratingSection(null)
+    setOmittedSections(new Set())
     setShareOpen(false)
     setCopied(null)
   }, [output])
@@ -78,23 +83,33 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
     const ri = getItems('risks', output.risks)
 
     if (format === 'markdown') {
-      return [
+      const blocks: string[] = [
         `## Core Problem\n\n${cp}`,
         `## First Move\n\n${fm.map((i) => `- ${i}`).join('\n')}`,
-        `## Next Steps\n\n${ns.map((i, n) => `${n + 1}. ${i}`).join('\n')}`,
-        `## Risks & Tradeoffs\n\n${ri.map((i) => `- ${i}`).join('\n')}`,
-        `## Estimated Time Saved\n\n${output.timeSaved}`,
-      ].join('\n\n')
+      ]
+      if (!omittedSections.has('nextSteps')) {
+        blocks.push(`## Next Steps\n\n${ns.map((i, n) => `${n + 1}. ${i}`).join('\n')}`)
+      }
+      if (!omittedSections.has('risks')) {
+        blocks.push(`## Risks & Tradeoffs\n\n${ri.map((i) => `- ${i}`).join('\n')}`)
+      }
+      blocks.push(`## Estimated Time Saved\n\n${output.timeSaved}`)
+      return blocks.join('\n\n')
     }
 
     const hr = (t: string) => `${t}\n${'─'.repeat(t.length)}`
-    return [
+    const blocks: string[] = [
       `${hr('CORE PROBLEM')}\n${cp}`,
       `${hr('FIRST MOVE')}\n${fm.map((i) => `• ${i}`).join('\n')}`,
-      `${hr('NEXT STEPS')}\n${ns.map((i, n) => `${n + 1}. ${i}`).join('\n')}`,
-      `${hr('RISKS & TRADEOFFS')}\n${ri.map((i) => `• ${i}`).join('\n')}`,
-      `${hr('ESTIMATED TIME SAVED')}\n${output.timeSaved}`,
-    ].join('\n\n')
+    ]
+    if (!omittedSections.has('nextSteps')) {
+      blocks.push(`${hr('NEXT STEPS')}\n${ns.map((i, n) => `${n + 1}. ${i}`).join('\n')}`)
+    }
+    if (!omittedSections.has('risks')) {
+      blocks.push(`${hr('RISKS & TRADEOFFS')}\n${ri.map((i) => `• ${i}`).join('\n')}`)
+    }
+    blocks.push(`${hr('ESTIMATED TIME SAVED')}\n${output.timeSaved}`)
+    return blocks.join('\n\n')
   }
 
   async function handleCopy(format: 'markdown' | 'plain') {
@@ -129,8 +144,8 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
 
   // --- Item interaction handlers ---
 
-  function handleHighlight(key: string) {
-    setHighlighted((prev) => {
+  function handlePrioritize(key: string) {
+    setPrioritized((prev) => {
       const next = new Set(prev)
       if (next.has(key)) next.delete(key)
       else next.add(key)
@@ -141,6 +156,78 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
   function handleRemove(key: string) {
     if (editing?.key === key) setEditing(null)
     setRemoved((prev) => new Set([...prev, key]))
+  }
+
+  function handleRestoreRemovedItem(key: string) {
+    setRemoved((prev) => {
+      const next = new Set(prev)
+      next.delete(key)
+      return next
+    })
+  }
+
+  function getRemovedItemPreview(key: string): string {
+    if (!output) return key
+    const addMatch = key.match(/^(firstMove|nextSteps|risks)-add-(\d+)$/)
+    if (addMatch) {
+      const section = addMatch[1] as SectionKey
+      const i = Number(addMatch[2])
+      const base = added[section][i]
+      const text = (texts[key] ?? base ?? '').trim()
+      return text || '(empty)'
+    }
+    const origMatch = key.match(/^(firstMove|nextSteps|risks)-(\d+)$/)
+    if (origMatch) {
+      const section = origMatch[1] as SectionKey
+      const i = Number(origMatch[2])
+      const arr = output[section] as string[]
+      const base = arr[i]
+      const text = (texts[key] ?? base ?? '').trim()
+      return text || '(empty)'
+    }
+    return key
+  }
+
+  function getRemovedKeysForSection(section: SectionKey): string[] {
+    return [...removed]
+      .filter((k) => k.startsWith(`${section}-`))
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+  }
+
+  function omitBriefSection(section: BriefSectionOmit) {
+    setOmittedSections((prev) => new Set([...prev, section]))
+    setAddingSection((s) => (s === section ? null : s))
+    setGeneratingSection((s) => (s === section ? null : s))
+    setEditing((e) => (e && e.key.startsWith(`${section}-`) ? null : e))
+    setPrioritized((prev) => {
+      const next = new Set<string>()
+      for (const k of prev) {
+        if (!k.startsWith(`${section}-`)) next.add(k)
+      }
+      return next
+    })
+    setRemoved((prev) => {
+      const next = new Set<string>()
+      for (const k of prev) {
+        if (!k.startsWith(`${section}-`)) next.add(k)
+      }
+      return next
+    })
+    setReloading((prev) => {
+      const next = new Set<string>()
+      for (const k of prev) {
+        if (!k.startsWith(`${section}-`)) next.add(k)
+      }
+      return next
+    })
+  }
+
+  function restoreBriefSection(section: BriefSectionOmit) {
+    setOmittedSections((prev) => {
+      const next = new Set(prev)
+      next.delete(section)
+      return next
+    })
   }
 
   async function handleReload(section: SectionKey, key: string, currentText: string) {
@@ -241,11 +328,11 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
           {allItems.map((item, displayIdx) => (
             <EditableItem
               key={item.key}
-              isHighlighted={highlighted.has(item.key)}
+              isPrioritized={prioritized.has(item.key)}
               isReloading={reloading.has(item.key)}
               isEditing={editing?.key === item.key}
               editDraft={editing?.key === item.key ? editing.draft : item.text}
-              onHighlight={() => handleHighlight(item.key)}
+              onPrioritize={() => handlePrioritize(item.key)}
               onRemove={() => handleRemove(item.key)}
               onReload={() => handleReload(section, item.key, item.text)}
               onEdit={() => handleEdit(item.key, item.text)}
@@ -306,8 +393,9 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
     )
   }
 
-  const highlightedCount = highlighted.size
+  const prioritizedCount = prioritized.size
   const removedCount = removed.size
+  const omittedCount = omittedSections.size
   const coreProblemText = texts['coreProblem'] ?? output.coreProblem
   const isEditingCoreProblem = editing?.key === 'coreProblem'
 
@@ -318,7 +406,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
         <div className="min-w-0">
           <p className="text-sm font-medium text-sage-600 uppercase tracking-widest mb-1">Execution Brief</p>
           <h2 className="text-xl font-semibold text-gray-900">Your First Move</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Hover any item to edit, highlight, swap, or remove.</p>
+          <p className="text-sm text-gray-500 mt-0.5">Hover any item to edit, prioritize, swap, or remove.</p>
         </div>
 
         <div className="flex flex-col items-end gap-2 flex-shrink-0">
@@ -347,11 +435,19 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
             )}
           </div>
 
-          {(highlightedCount > 0 || removedCount > 0) && (
+          {(prioritizedCount > 0 || removedCount > 0 || omittedCount > 0) && (
             <div className="flex gap-1.5 flex-wrap justify-end">
-              {highlightedCount > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />{highlightedCount} highlighted
+              {omittedCount > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 border border-violet-200 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
+                  {omittedCount} section{omittedCount === 1 ? '' : 's'} omitted
+                </span>
+              )}
+              {prioritizedCount > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                  <span className="flex h-3 w-3 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold leading-none text-white" aria-hidden>
+                    !
+                  </span>
+                  {prioritizedCount} prioritized
                 </span>
               )}
               {removedCount > 0 && (
@@ -405,17 +501,69 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
           <span className="text-[10px] font-semibold text-sage-500 bg-sage-100 px-2 py-0.5 rounded-full">This week</span>
         </div>
         {renderSection('firstMove', output.firstMove, () => <MovePrefix />)}
+        <RemovedItemsRestoreDropdown
+          variant="firstMove"
+          removedKeys={getRemovedKeysForSection('firstMove')}
+          getPreview={getRemovedItemPreview}
+          onRestore={handleRestoreRemovedItem}
+        />
       </div>
 
       {/* Next Steps */}
-      <Card icon={<StepsIcon />} title="Next Steps">
-        {renderSection('nextSteps', output.nextSteps, (i) => <NumberPrefix n={i + 1} />)}
-      </Card>
+      {omittedSections.has('nextSteps') ? (
+        <OmittedSectionBanner title="Next Steps" onRestore={() => restoreBriefSection('nextSteps')} />
+      ) : (
+        <Card
+          icon={<StepsIcon />}
+          title="Next Steps"
+          action={
+            <button
+              type="button"
+              title="Remove this section from the brief"
+              onClick={() => omitBriefSection('nextSteps')}
+              className="opacity-0 group-hover/card:opacity-100 transition-opacity duration-100 text-xs font-medium text-gray-400 hover:text-red-600 px-2 py-1 rounded-md hover:bg-red-50"
+            >
+              Remove section
+            </button>
+          }
+        >
+          {renderSection('nextSteps', output.nextSteps, (i) => <NumberPrefix n={i + 1} />)}
+          <RemovedItemsRestoreDropdown
+            variant="card"
+            removedKeys={getRemovedKeysForSection('nextSteps')}
+            getPreview={getRemovedItemPreview}
+            onRestore={handleRestoreRemovedItem}
+          />
+        </Card>
+      )}
 
       {/* Risks */}
-      <Card icon={<RiskIcon />} title="Risks & Tradeoffs">
-        {renderSection('risks', output.risks, () => <WarningPrefix />)}
-      </Card>
+      {omittedSections.has('risks') ? (
+        <OmittedSectionBanner title="Risks & Tradeoffs" onRestore={() => restoreBriefSection('risks')} />
+      ) : (
+        <Card
+          icon={<RiskIcon />}
+          title="Risks & Tradeoffs"
+          action={
+            <button
+              type="button"
+              title="Remove this section from the brief"
+              onClick={() => omitBriefSection('risks')}
+              className="opacity-0 group-hover/card:opacity-100 transition-opacity duration-100 text-xs font-medium text-gray-400 hover:text-red-600 px-2 py-1 rounded-md hover:bg-red-50"
+            >
+              Remove section
+            </button>
+          }
+        >
+          {renderSection('risks', output.risks, () => <WarningPrefix />)}
+          <RemovedItemsRestoreDropdown
+            variant="card"
+            removedKeys={getRemovedKeysForSection('risks')}
+            getPreview={getRemovedItemPreview}
+            onRestore={handleRestoreRemovedItem}
+          />
+        </Card>
+      )}
 
       {/* Time Saved */}
       <div className="rounded-xl border border-sage-200 bg-sage-50 px-5 py-4 flex items-center justify-between gap-4">
@@ -425,6 +573,95 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
         </div>
         <span className="text-xl font-bold text-sage-700 tracking-tight text-right">{output.timeSaved}</span>
       </div>
+    </div>
+  )
+}
+
+function RemovedItemsRestoreDropdown({
+  variant,
+  removedKeys,
+  getPreview,
+  onRestore,
+}: {
+  variant: 'firstMove' | 'card'
+  removedKeys: string[]
+  getPreview: (key: string) => string
+  onRestore: (key: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onDocClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [open])
+
+  if (removedKeys.length === 0) return null
+
+  const topBorder =
+    variant === 'firstMove' ? 'border-t border-sage-200/70' : 'border-t border-gray-100'
+  const buttonIdle =
+    variant === 'firstMove'
+      ? 'border-sage-200/80 bg-white/70 hover:bg-white hover:border-sage-300'
+      : 'border-gray-200 bg-gray-50/50 hover:bg-white hover:border-gray-300'
+
+  return (
+    <div ref={ref} className={`relative mt-3 pt-3 ${topBorder}`}>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-xs font-semibold text-gray-600 transition-colors ${buttonIdle}`}
+      >
+        <span>Removed items ({removedKeys.length})</span>
+        <ChevronIcon open={open} />
+      </button>
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-56 overflow-y-auto rounded-xl border border-gray-100 bg-white shadow-lg shadow-black/5">
+          <ul className="py-0.5" role="listbox">
+            {removedKeys.map((key) => (
+              <li key={key} role="option">
+                <button
+                  type="button"
+                  className="flex w-full items-start justify-between gap-2 border-b border-gray-50 px-3 py-2.5 text-left text-sm last:border-b-0 hover:bg-sage-50"
+                  onClick={() => {
+                    onRestore(key)
+                    setOpen(false)
+                  }}
+                >
+                  <span className="min-w-0 flex-1 leading-snug text-gray-700 line-clamp-3">{getPreview(key)}</span>
+                  <span className="shrink-0 text-xs font-semibold text-sage-600">Restore</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// --- Omitted section (hidden from UI + share/copy) ---
+
+function OmittedSectionBanner({ title, onRestore }: { title: string; onRestore: () => void }) {
+  return (
+    <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/90 px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-sm text-gray-600 min-w-0">
+        <span className="font-semibold text-gray-800">{title}</span>
+        {' '}
+        is hidden and won&apos;t be included when you copy, email, or download this brief.
+      </p>
+      <button
+        type="button"
+        onClick={onRestore}
+        className="shrink-0 text-xs font-semibold text-sage-600 hover:text-sage-800 px-3 py-1.5 rounded-lg border border-sage-200 bg-white hover:bg-sage-50 transition-colors"
+      >
+        Restore section
+      </button>
     </div>
   )
 }
@@ -442,9 +679,9 @@ function ShareMenuItem({ icon, label, checked, onClick }: { icon: React.ReactNod
 
 // --- EditableItem ---
 
-function EditableItem({ isHighlighted, isReloading, isEditing, editDraft, onHighlight, onRemove, onReload, onEdit, onDraftChange, onSave, onCancelEdit, prefix, children }: {
-  isHighlighted: boolean; isReloading: boolean; isEditing: boolean; editDraft: string
-  onHighlight: () => void; onRemove: () => void; onReload: () => void; onEdit: () => void
+function EditableItem({ isPrioritized, isReloading, isEditing, editDraft, onPrioritize, onRemove, onReload, onEdit, onDraftChange, onSave, onCancelEdit, prefix, children }: {
+  isPrioritized: boolean; isReloading: boolean; isEditing: boolean; editDraft: string
+  onPrioritize: () => void; onRemove: () => void; onReload: () => void; onEdit: () => void
   onDraftChange: (v: string) => void; onSave: () => void; onCancelEdit: () => void
   prefix: React.ReactNode; children: React.ReactNode
 }) {
@@ -475,18 +712,27 @@ function EditableItem({ isHighlighted, isReloading, isEditing, editDraft, onHigh
   }
 
   return (
-    <li className={`group relative flex items-start gap-2 rounded-lg px-2 py-1.5 -mx-2 transition-colors duration-100 ${isHighlighted ? 'bg-amber-50 border border-amber-200' : 'hover:bg-black/[0.025]'}`}>
+    <li className={`group relative flex items-start gap-2 rounded-lg px-2 py-1.5 -mx-2 transition-colors duration-100 ${isPrioritized ? 'bg-blue-50 border border-blue-200' : 'hover:bg-black/[0.025]'}`}>
       {prefix}
-      <span className={`text-sm text-gray-700 leading-relaxed flex-1 min-w-0 ${isReloading ? 'opacity-30' : ''}`}>
+      <span className={`text-sm leading-relaxed flex-1 min-w-0 ${isReloading ? 'opacity-30' : ''} ${!isReloading && isPrioritized ? 'text-blue-800 font-medium' : !isReloading ? 'text-gray-700' : ''}`}>
         {isReloading ? (
           <span className="inline-flex items-center gap-1.5 text-gray-400 italic text-xs"><Spinner /> Generating…</span>
-        ) : children}
+        ) : isPrioritized ? (
+          <span className="inline-flex items-start gap-2">
+            <span className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold leading-none text-white" aria-hidden>
+              !
+            </span>
+            <span>{children}</span>
+          </span>
+        ) : (
+          children
+        )}
       </span>
       <div className="flex-shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-100 mt-0.5">
-        <ActionBtn title={isHighlighted ? 'Remove highlight' : 'Highlight'} onClick={onHighlight} active={isHighlighted}><HighlightIcon active={isHighlighted} /></ActionBtn>
+        <ActionBtn title={isPrioritized ? 'Un-prioritize' : 'Prioritize'} onClick={onPrioritize} active={isPrioritized}><PriorityIcon active={isPrioritized} /></ActionBtn>
         <ActionBtn title="Edit" onClick={onEdit}><EditIcon /></ActionBtn>
         <ActionBtn title="Swap suggestion" onClick={onReload} disabled={isReloading}><ReloadIcon spinning={isReloading} /></ActionBtn>
-        <ActionBtn title="Remove" onClick={onRemove} danger><RemoveIcon /></ActionBtn>
+        <ActionBtn title="Remove from brief (restore in section menu)" onClick={onRemove} danger><RemoveIcon /></ActionBtn>
       </div>
     </li>
   )
@@ -556,7 +802,7 @@ function ActionBtn({ title, onClick, active, danger, disabled, children }: {
     <button
       title={title} onClick={onClick} disabled={disabled}
       className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors duration-100 disabled:pointer-events-none ${
-        active ? 'bg-amber-100 text-amber-600 hover:bg-amber-200'
+        active ? 'bg-blue-100 text-blue-600 hover:bg-blue-200'
         : danger ? 'text-gray-400 hover:bg-red-50 hover:text-red-500'
         : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
       }`}
@@ -749,10 +995,22 @@ function CheckCircleIcon() {
   )
 }
 
-function HighlightIcon({ active }: { active?: boolean }) {
+function PriorityIcon({ active }: { active?: boolean }) {
   return (
-    <svg className={ic} viewBox="0 0 16 16" fill={active ? 'currentColor' : 'none'}>
-      <path d="M10 2l4 4-6 6H4v-4l6-6z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    <svg className={ic} viewBox="0 0 16 16" fill="none" aria-hidden>
+      {active ? (
+        <>
+          <circle cx="8" cy="8" r="6.5" fill="currentColor" />
+          <path d="M8 4.75v4.25" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
+          <circle cx="8" cy="11.35" r="0.85" fill="white" />
+        </>
+      ) : (
+        <>
+          <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.4" />
+          <path d="M8 4.75v4.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          <circle cx="8" cy="11.35" r="0.85" fill="currentColor" />
+        </>
+      )}
     </svg>
   )
 }
