@@ -2,17 +2,25 @@
 
 **Don't overthink. Make the first move.**
 
-FirstMove turns a rough idea into an execution-ready brief in seconds. Describe what you're thinking — in plain language, no structure required — and get back a clear problem framing, a concrete first move, and the next steps to keep momentum going.
+FirstMove is built for ops leads, team leads, and executives who need to move fast — not spend hours turning a half-formed idea into something their team can actually act on. Describe what you're thinking, get back an execution-ready brief in seconds, and walk into the next conversation with a plan.
 
 ---
 
 ## The problem it solves
 
-Most ideas don't die from lack of merit. They die in the space between "we should do something about this" and "here's what we're actually doing." That space is filled with scheduling planning sessions, arguing about framing, debating priorities, and — most often — just not knowing where to start.
+In fast-moving operations teams, the bottleneck is rarely the idea. It's the space between "we need to fix this" and "here's what we're doing about it." That space fills up with planning sessions, alignment meetings, framing debates, and the particular kind of inertia that sets in when everyone's waiting for someone else to structure the problem first.
 
-Analysis paralysis is expensive. The more options you have, the longer the delay. The longer the delay, the more likely the idea gets deprioritized, lost, or quietly abandoned.
+Analysis paralysis is expensive at the individual level. At the team and company level, it compounds. Every week an ops improvement sits in a Notion doc waiting to become a real plan is a week of inefficiency, cost, or customer friction that didn't need to happen.
 
 FirstMove removes that gap. You put in the idea as it exists in your head. You get out something your team can run with.
+
+---
+
+## Who it's for
+
+- **Operations leaders** managing complex, cross-functional processes who need to move from problem to plan without a two-day offsite
+- **Executives** who spot inefficiencies or opportunities but don't have time to write the brief themselves
+- **Team leads** who want to bring a structured proposal to leadership, not just a complaint or a vague suggestion
 
 ---
 
@@ -25,8 +33,8 @@ FirstMove removes that gap. You put in the idea as it exists in your head. You g
    - **First Move** — concrete actions to take this week, not a roadmap for the next quarter
    - **Next Steps** — what comes after the first move lands
    - **Risks & Tradeoffs** — the things most likely to go wrong, called out early
-4. **Make it yours** — the brief is a starting point, not a final answer. Every section is editable: rewrite any item directly, swap it for an AI-generated alternative, remove what doesn't fit, or add something the AI missed — manually or by asking it to generate one. The output adapts to your judgment.
-5. **Share** — copy as Markdown or plain text, send via email, or download as a `.txt` file.
+4. **Make it yours** — the brief is a starting point, not a final answer. Every section is editable: rewrite any item directly, swap it for an AI-generated alternative, remove what doesn't fit, or add something the AI missed — manually or by asking it to generate one. The output adapts to your judgment, not the other way around.
+5. **Share** — copy as Markdown or plain text, send via email, or download as a `.txt` file. Ready to drop into a Slack message, a meeting doc, or a leadership update.
 
 ---
 
@@ -35,17 +43,17 @@ FirstMove removes that gap. You put in the idea as it exists in your head. You g
 FirstMove is an MVP. The core loop works. Here's where it goes from here:
 
 **Make "time saved" real**
-Right now the time estimate is illustrative. With company-specific data — how long your team typically spends in brief-writing, planning cycles, or kickoff prep — it becomes a number you can actually stand behind.
+Right now the time estimate is illustrative. With company-specific data — how long your team typically spends in brief-writing, planning cycles, or kickoff prep — it becomes a number leadership can actually act on.
 
 **Integrate where work happens**
-Post a brief directly to Slack. Add a first-move task to Linear, Jira, or Asana. Draft a kickoff email without leaving the page. The brief is useful on its own; it's more useful when it's already where your team is working.
+Post a brief directly to Slack. Add a first-move task to Linear, Jira, or Asana. Draft a kickoff email without leaving the page. The brief is more useful when it's already where your team is working.
 
 **Save and share briefs**
-Persistent brief history, unique shareable links, and team access. Right now everything lives in the session. The next step is making briefs first-class objects you can revisit, compare, and build on.
+Persistent brief history, unique shareable links, and team access. Right now everything lives in the session. The next step is making briefs first-class objects that teams can revisit, compare, and build on together.
 
 **Adapt to your company's context**
-A brief about refund handling means something different at a two-person startup than at a company processing ten thousand orders a day. With company context — team structure, tools, known constraints — the output stops being generic and starts sounding like it was written by someone who knows your business.
+A brief about delivery escalations means something different at a 10-person logistics startup than at a company running thousands of routes a day. With company context — team structure, tools, known constraints, past decisions — the output stops being generic and starts sounding like it was written by someone who actually knows your operation.
 
 ---
 
-*Built to explore how AI can reduce the gap between idea and execution.*
+*Built to explore how AI can reduce the gap between idea and execution — for the teams who can least afford to wait.*
