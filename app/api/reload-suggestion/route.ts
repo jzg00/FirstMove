@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { IdeaType } from '@/lib/types'
+import { enforceWafRateLimit } from '@/lib/wafRateLimit'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -20,6 +21,12 @@ export async function POST(req: NextRequest) {
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: 'API key not set.' }, { status: 500 })
   }
+
+  const limited = await enforceWafRateLimit(req, [
+    'VERCEL_WAF_RATE_LIMIT_ID_RELOAD',
+    'VERCEL_WAF_RATE_LIMIT_ID',
+  ])
+  if (limited) return limited
 
   const body = await req.json()
   const { section, ideaType, ideaText, currentText, existingItems, mode = 'replace' } = body

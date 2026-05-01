@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { BriefOutput, IdeaType } from '@/lib/types'
+import { enforceWafRateLimit } from '@/lib/wafRateLimit'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -39,6 +40,12 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     )
   }
+
+  const limited = await enforceWafRateLimit(req, [
+    'VERCEL_WAF_RATE_LIMIT_ID_GENERATE',
+    'VERCEL_WAF_RATE_LIMIT_ID',
+  ])
+  if (limited) return limited
 
   const body = await req.json()
   const idea: string = body.idea ?? ''
