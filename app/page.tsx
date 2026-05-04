@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import InputPanel from '@/components/InputPanel'
 import OutputPanel from '@/components/OutputPanel'
+import SignalPanel from '@/components/SignalPanel'
 import { BriefOutput, IdeaType } from '@/lib/types'
 
 const GITHUB_REPO_URL = 'https://github.com/jzg00/FirstMove'
@@ -13,6 +14,12 @@ export default function Home() {
   const [output, setOutput] = useState<BriefOutput | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const briefPanelRef = useRef<HTMLDivElement>(null)
+
+  function handleDraftBrief(context: string) {
+    setIdea(context)
+    briefPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   async function handleGenerate() {
     if (!idea.trim()) return
@@ -118,9 +125,14 @@ export default function Home() {
           </div>
         )}
 
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        {/* Signal Scanner */}
+        <div className="mb-8">
+          <SignalPanel onDraftBrief={handleDraftBrief} />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Left */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+          <div ref={briefPanelRef} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
             <InputPanel
               idea={idea}
               ideaType={ideaType}
