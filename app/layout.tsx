@@ -5,8 +5,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'FirstMove — Turn ideas into execution plans',
-  description: "Don't overthink. Make the first move.",
+  title: 'FirstMove — For leaders who move fast',
+  description: "Turn operational signals into decisions — before they become crises.",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
