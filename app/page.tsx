@@ -118,7 +118,7 @@ export default function Home() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Left */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
             <InputPanel
