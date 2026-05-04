@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { IdeaType } from '@/lib/types'
 
 const IDEA_TYPES: { value: IdeaType; label: string }[] = [
@@ -57,6 +58,7 @@ interface InputPanelProps {
   idea: string
   ideaType: IdeaType
   loading: boolean
+  prefilledContext?: string | null
   onIdeaChange: (val: string) => void
   onTypeChange: (val: IdeaType) => void
   onSubmit: () => void
@@ -66,14 +68,22 @@ export default function InputPanel({
   idea,
   ideaType,
   loading,
+  prefilledContext,
   onIdeaChange,
   onTypeChange,
   onSubmit,
 }: InputPanelProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
   const examples = EXAMPLES[ideaType]
 
+  useEffect(() => {
+    if (!prefilledContext) return
+    onIdeaChange(prefilledContext)
+    containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [prefilledContext])
+
   return (
-    <div className="flex flex-col gap-6">
+    <div ref={containerRef} className="flex flex-col gap-6">
       {/* Header */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900">

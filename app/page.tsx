@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import InputPanel from '@/components/InputPanel'
 import OutputPanel from '@/components/OutputPanel'
 import SignalPanel from '@/components/SignalPanel'
@@ -14,11 +14,10 @@ export default function Home() {
   const [output, setOutput] = useState<BriefOutput | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const briefPanelRef = useRef<HTMLDivElement>(null)
+  const [prefilledContext, setPrefilledContext] = useState<string | null>(null)
 
   function handleDraftBrief(context: string) {
-    setIdea(context)
-    briefPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    setPrefilledContext(context)
   }
 
   async function handleGenerate() {
@@ -132,11 +131,12 @@ export default function Home() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Left */}
-          <div ref={briefPanelRef} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
             <InputPanel
               idea={idea}
               ideaType={ideaType}
               loading={loading}
+              prefilledContext={prefilledContext}
               onIdeaChange={setIdea}
               onTypeChange={setIdeaType}
               onSubmit={handleGenerate}
