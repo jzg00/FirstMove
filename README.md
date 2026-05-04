@@ -1,51 +1,54 @@
 # FirstMove
 
-**Don't overthink. Make the first move.**
+**Turn operational signals into decisions — before they become crises.**
 
-FirstMove turns a rough idea into an execution-ready brief in seconds. Describe what you're thinking — in plain language, no structure required — and get back a clear problem framing, a concrete first move, and the next steps to keep momentum going.
+FirstMove is a predictive operations cockpit. It ingests operational data alongside external signals — weather forecasts, commodity moves, demand-side trends — and surfaces what is most likely to escalate in the next 7-14 days. One click turns any flagged risk into a delegatable executive brief.
 
 ---
 
 ## The problem it solves
 
-Most ideas don't die from lack of merit. They die in the space between "we should do something about this" and "here's what we're actually doing." That space is filled with scheduling planning sessions, arguing about framing, debating priorities, and — most often — just not knowing where to start.
+Most operational fires aren't surprises in retrospect. The signal was in the data — a delivery hub already running 2x its normal failure rate, a supplier whose lead time was creeping up, a category whose search interest was cooling — and there was usually an external signal pointing the same direction days or weeks before it broke. What's missing isn't the data. It's the orchestration: somebody, or something, asking *which of these signals are about to compound, and which decision do I need to make this week to get ahead of it?*
 
-Analysis paralysis is expensive. The more options you have, the longer the delay. The longer the delay, the more likely the idea gets deprioritized, lost, or quietly abandoned.
-
-FirstMove removes that gap. You put in the idea as it exists in your head. You get out something your team can run with.
+FirstMove is that orchestration layer. It reads internal performance data and external signals together, prioritizes the items most likely to escalate, and hands the executive a brief — problem, first move, next steps, risks — they can run with or delegate immediately.
 
 ---
 
 ## How it works
 
-1. **Describe your idea** — free-form, no formatting needed. A sentence or a paragraph, whatever you have.
-2. **Select a type** — Product Idea, Operations Improvement, or Workflow Redesign. This shapes how the brief is framed.
-3. **Generate** — the AI cuts through the noise and returns a focused brief:
-   - **Core Problem** — a sharp framing of what's actually broken and why it costs the business
-   - **First Move** — concrete actions to take this week, not a roadmap for the next quarter
+1. **Pick a dataset** — Delivery Risk Forecast, Procurement Risk Outlook, or Demand Signal Watch. Each pairs internal operating metrics with a column of external signals.
+2. **Analyze with AI** — FirstMove reads the rows and ranks the 3-5 items most likely to escalate in the next 7-14 days, weighting compounding risk: a weak internal metric *and* a concerning external signal pointing the same direction.
+3. **Review the signals** — each card explains the forward-looking risk, references the specific numbers, and names the external signal that's pulling it forward.
+4. **Draft a brief** — one click pre-fills the brief generator with the operational context for that signal. Generate to get a focused executive brief:
+   - **Core Problem** — sharp framing of what's about to break and why it costs the business
+   - **First Move** — concrete actions to take this week, not a roadmap for the quarter
    - **Next Steps** — what comes after the first move lands
-   - **Risks & Tradeoffs** — the things most likely to go wrong, called out early
-4. **Make it yours** — the brief is a starting point, not a final answer. Every section is editable: rewrite any item directly, swap it for an AI-generated alternative, remove what doesn't fit, or add something the AI missed — manually or by asking it to generate one. The output adapts to your judgment, not the other way around.
-5. **Share** — copy as Markdown or plain text, send via email, or download as a `.txt` file. Ready to drop into a Slack message, a meeting doc, or a leadership update.
+   - **Risks & Tradeoffs** — what's most likely to go wrong, called out early
+5. **Make it yours** — every section is editable: rewrite, swap with an AI alternative, remove, or add. The output adapts to executive judgment, not the other way around.
+6. **Share** — copy as Markdown or plain text, send via email, or download as a `.txt` file. Drop it in a Slack message, a meeting doc, or a leadership update.
 
 ---
 
 ## What's next
 
-FirstMove is an MVP. The core loop works. Here's where it goes from here:
+FirstMove is an MVP. The signal → brief loop works on sample data. The next step is wiring the signal side to live sources so the morning queue is real:
 
-**Make "time saved" real**
-Right now the time estimate is illustrative. With company-specific data — how long your team typically spends in brief-writing, planning cycles, or kickoff prep — it becomes a number leadership can actually act on.
+**Real internal data sources**
+Connect directly to fulfillment systems, supplier dashboards, and menu/SKU performance feeds. The current sample datasets are stand-ins for what should be a continuous read of the operational systems leadership already trusts.
 
-**Integrate where work happens**
-Post a brief directly to Slack. Add a first-move task to Linear, Jira, or Asana. Draft a kickoff email without leaving the page. The brief is more useful when it's already where your team is working.
+**External signal integrations**
+The leading-indicator side is where the predictive value lives. Production-grade signals would include:
+- **Weather APIs** (NOAA, OpenWeather, Tomorrow.io) — heat domes, storm systems, hurricanes feeding into delivery and cold-chain risk forecasts
+- **Commodity and futures feeds** (USDA, CME, Mintec) — protein, grain, dairy, and produce price moves feeding procurement risk outlooks
+- **Demand trend signals** (Google Trends, search APIs, retail intelligence) — category-level interest curves feeding menu and SKU forecasts
+- **Social listening** (Brandwatch, Sprout, Reddit/TikTok APIs) — sentiment shifts and viral mentions feeding both demand and brand-risk signals
 
-**Save and share briefs**
-Persistent brief history, unique shareable links, and team access. Right now everything lives in the session. The next step is making briefs first-class objects that teams can revisit, compare, and build on together.
+**Persistent signal history and handoff**
+Today every scan is ephemeral. Persistent signals would let leadership track which forecasts played out, tune the prioritizer over time, and create accountability — every flagged signal goes somewhere (Slack thread, Linear ticket, calendar block) instead of evaporating when the tab closes.
 
-**Adapt to your company's context**
-A brief about delivery escalations means something different at a 10-person logistics startup than at a company running thousands of routes a day. With company context — team structure, tools, known constraints, past decisions — the output stops being generic and starts sounding like it was written by someone who actually knows your operation.
+**Adapt to the operation it's reading**
+A delivery escalation means something different at a 10-person logistics startup than at a company running thousands of routes a day. With company context — team structure, tools, known constraints, past decisions — both the signal prioritization and the briefs stop feeling generic and start sounding like they were written by someone who knows the operation.
 
 ---
 
-*Built to explore how AI can reduce the gap between idea and execution — for the teams who can least afford to wait.*
+*Built to explore how AI can compress the time between signal and action — for the leaders who can least afford to wait.*
