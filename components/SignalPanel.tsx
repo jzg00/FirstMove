@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DatasetId, Signal } from '@/lib/types'
 import { SAMPLE_DATASETS } from '@/lib/sampleData'
 
@@ -65,21 +65,26 @@ interface SignalPanelProps {
 }
 
 export default function SignalPanel({ onDraftBrief }: SignalPanelProps) {
-  const [selectedDataset, setSelectedDataset] = useState<DatasetId>('logistics')
+  const [selectedDataset, setSelectedDataset] = useState<DatasetId | null>(null)
   const [loading, setLoading] = useState(false)
   const [signals, setSignals] = useState<Signal[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const resultsRef = useRef<HTMLDivElement>(null)
+  const datasetContentRef = useRef<HTMLDivElement>(null)
 
   function handleSelectDataset(id: DatasetId) {
     setSelectedDataset(id)
     setSignals(null)
     setError(null)
+    setLoading(false)
+    setTimeout(() => datasetContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80)
   }
 
   async function handleAnalyze() {
     setLoading(true)
     setError(null)
     setSignals(null)
+    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
     try {
       const res = await fetch('/api/prioritize-signals', {
         method: 'POST',
@@ -99,7 +104,7 @@ export default function SignalPanel({ onDraftBrief }: SignalPanelProps) {
     }
   }
 
-  const selected = SAMPLE_DATASETS.find((d) => d.id === selectedDataset)!
+  const selected = selectedDataset ? SAMPLE_DATASETS.find((d) => d.id === selectedDataset)! : null
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
@@ -135,56 +140,65 @@ export default function SignalPanel({ onDraftBrief }: SignalPanelProps) {
             </button>
           ))}
         </div>
-        <p className="text-xs text-gray-400 mt-2">{selected.description}</p>
+        {selected && (
+          <p className="text-xs text-gray-400 mt-2 animate-fade-up">{selected.description}</p>
+        )}
       </div>
 
-      {/* Dataset preview table */}
-      <DatasetTable rows={selected.rows} />
+      {selected && (
+        <div key={selectedDataset} ref={datasetContentRef}>
+          {/* Dataset preview table */}
+          <div className="animate-fade-up">
+            <DatasetTable rows={selected.rows} />
+          </div>
 
-      {/* Analyze CTA */}
-      <button
-        type="button"
-        onClick={handleAnalyze}
-        disabled={loading}
-        className="mt-4 w-full flex items-center justify-center gap-2.5 rounded-xl bg-sage-600 hover:bg-sage-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold px-6 py-3.5 text-sm transition-all duration-150 shadow-sm hover:shadow-md disabled:shadow-none"
-      >
-        {loading ? (
-          <>
-            <Spinner className="w-4 h-4" />
-            Scanning for signals…
-          </>
-        ) : (
-          <>
-            <ScanIcon />
-            Analyze with AI
-          </>
-        )}
-      </button>
+          {/* Analyze CTA */}
+          <button
+            type="button"
+            onClick={handleAnalyze}
+            disabled={loading}
+            className="mt-4 w-full flex items-center justify-center gap-2.5 rounded-xl bg-sage-600 hover:bg-sage-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold px-6 py-3.5 text-sm transition-all duration-150 shadow-sm hover:shadow-md disabled:shadow-none animate-fade-up stagger-1"
+          >
+            {loading ? (
+              <>
+                <Spinner className="w-4 h-4" />
+                Scanning for signals…
+              </>
+            ) : (
+              <>
+                <ScanIcon />
+                Analyze with AI
+              </>
+            )}
+          </button>
 
-      {/* Error */}
-      {error && (
-        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
-      )}
+          {/* Error */}
+          {error && (
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
-      {/* Loading skeleton */}
-      {loading && <ScanLoadingSkeleton />}
+          {/* Loading skeleton + results anchor */}
+          <div ref={resultsRef} />
+          {loading && <ScanLoadingSkeleton />}
 
-      {/* Signal cards */}
-      {!loading && signals && signals.length > 0 && (
-        <div className="mt-5 flex flex-col gap-3">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            {signals.length} Signal{signals.length !== 1 ? 's' : ''} · Ranked by Impact
-          </p>
-          {signals.map((signal, i) => (
-            <SignalCard
-              key={signal.id}
-              signal={signal}
-              rank={i + 1}
-              onDraftBrief={onDraftBrief}
-            />
-          ))}
+          {/* Signal cards */}
+          {!loading && signals && signals.length > 0 && (
+            <div className="mt-5 flex flex-col gap-3">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                {signals.length} Signal{signals.length !== 1 ? 's' : ''} · Ranked by Impact
+              </p>
+              {signals.map((signal, i) => (
+                <SignalCard
+                  key={signal.id}
+                  signal={signal}
+                  rank={i + 1}
+                  onDraftBrief={onDraftBrief}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -200,7 +214,7 @@ function DatasetTable({ rows }: { rows: Record<string, unknown>[] }) {
   return (
     <div className="rounded-xl border border-gray-200 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-200">
-        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Raw Data</span>
+        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Sample Data</span>
         <span className="inline-flex items-center rounded-full bg-sage-50 border border-sage-200 px-2 py-0.5 text-[11px] font-semibold text-sage-700">
           {rows.length} rows
         </span>
