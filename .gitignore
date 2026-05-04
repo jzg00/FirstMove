@@ -26,3 +26,4 @@ pnpm-debug.log*
 *.tsbuildinfo
 
 notes.md
+rework-plan.md
