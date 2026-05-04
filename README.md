@@ -51,4 +51,4 @@ A delivery escalation means something different at a 10-person logistics startup
 
 ---
 
-*Built to explore how AI can compress the time between signal and action — for the leaders who can least afford to wait.*
+*Built to explore how AI can reduce the gap between signal and action — for the leaders who can least afford to wait.*

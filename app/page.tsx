@@ -107,8 +107,8 @@ export default function Home() {
             For leaders who move fast
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight leading-tight mb-3">
-            Turn messy ideas into{' '}
-            <span className="text-sage-600">execution-ready plans</span>
+            Don&apos;t wait.{' '}
+            <span className="text-sage-600">Make the first move.</span>
           </h1>
           <p className="text-gray-500 text-base max-w-2xl mx-auto">
             FirstMove ingests operational data and external signals to surface what&apos;s about to need your attention. One click turns any risk into a delegatable brief.
@@ -153,7 +153,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-gray-100 py-6 px-6 flex flex-col items-center gap-4 text-center">
         <p className="text-xs text-gray-400 max-w-md">
-          Built to explore how AI can reduce the gap between idea and execution.
+          Built to explore how AI can reduce the gap between signal and action
         </p>
         <a
           href={GITHUB_REPO_URL}
