@@ -1,8 +1,8 @@
-import { IdeaType } from './types'
+import { BriefType } from './types'
 
 type SectionKey = 'firstMove' | 'v1Scope' | 'nextSteps' | 'risks'
 
-export const RELOAD_POOL: Record<IdeaType, Record<SectionKey, string[]>> = {
+export const RELOAD_POOL: Record<BriefType, Record<SectionKey, string[]>> = {
   product: {
     firstMove: [
       'Launch a Notion brief template and validate the format with 3 teams before building anything.',

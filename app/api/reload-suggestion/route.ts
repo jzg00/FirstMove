@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { IdeaType } from '@/lib/types'
+import { BriefType } from '@/lib/types'
 import { enforceWafRateLimit } from '@/lib/wafRateLimit'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -11,10 +11,10 @@ const SECTION_LABELS: Record<string, string> = {
   risks: 'Risks & Tradeoffs — a specific risk or tradeoff to watch for (one sentence)',
 }
 
-const IDEA_TYPE_LABELS: Record<IdeaType, string> = {
-  product: 'Product Idea',
-  operations: 'Operations Improvement',
-  workflow: 'Workflow Redesign',
+const BRIEF_TYPE_LABELS: Record<BriefType, string> = {
+  product: 'Product Brief',
+  operations: 'Operational Risk',
+  workflow: 'Process Issue',
 }
 
 export async function POST(req: NextRequest) {
@@ -29,14 +29,14 @@ export async function POST(req: NextRequest) {
   if (limited) return limited
 
   const body = await req.json()
-  const { section, ideaType, ideaText, currentText, existingItems, mode = 'replace' } = body
+  const { section, briefType, contextText, currentText, existingItems, mode = 'replace' } = body
 
-  if (!section || !ideaText?.trim()) {
+  if (!section || !contextText?.trim()) {
     return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 })
   }
 
   const sectionLabel = SECTION_LABELS[section] ?? section
-  const ideaLabel = IDEA_TYPE_LABELS[ideaType as IdeaType] ?? ideaType
+  const briefLabel = BRIEF_TYPE_LABELS[briefType as BriefType] ?? briefType
   const others = Array.isArray(existingItems) && existingItems.length > 0
     ? `\nExisting items in this section (do not duplicate):\n${existingItems.map((t: string) => `- ${t}`).join('\n')}`
     : ''
@@ -44,14 +44,14 @@ export async function POST(req: NextRequest) {
   const prompt = mode === 'add'
     ? `Write ONE new item for the "${sectionLabel}" section of an exec brief.
 
-Idea type: ${ideaLabel}
-Idea: ${ideaText}${others}
+Brief type: ${briefLabel}
+Situation: ${contextText}${others}
 
 Return ONLY the text — no bullet, no numbering, no quotes, no explanation.`
     : `Replace one item in an exec brief.
 
-Idea type: ${ideaLabel}
-Idea: ${ideaText}
+Brief type: ${briefLabel}
+Situation: ${contextText}
 
 Section: ${sectionLabel}
 Replace this: ${currentText}${others}

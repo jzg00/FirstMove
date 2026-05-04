@@ -1,13 +1,13 @@
 'use client'
 
 import { useEffect, useRef, useState, type MutableRefObject, type RefObject } from 'react'
-import { BriefOutput, IdeaType } from '@/lib/types'
+import { BriefOutput, BriefType } from '@/lib/types'
 
 interface OutputPanelProps {
   output: BriefOutput | null
   loading: boolean
-  ideaType: IdeaType
-  idea: string
+  briefType: BriefType
+  context: string
 }
 
 type SectionKey = 'firstMove' | 'nextSteps' | 'risks'
@@ -19,7 +19,7 @@ const EMPTY_ADDED: Record<SectionKey, string[]> = {
   firstMove: [], nextSteps: [], risks: [],
 }
 
-export default function OutputPanel({ output, loading, ideaType, idea }: OutputPanelProps) {
+export default function OutputPanel({ output, loading, briefType, context }: OutputPanelProps) {
   const [prioritized, setPrioritized] = useState<Set<string>>(new Set())
   const [removed, setRemoved] = useState<Set<string>>(new Set())
   const [texts, setTexts] = useState<Record<string, string>>({})
@@ -277,7 +277,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
       const res = await fetch('/api/reload-suggestion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ section, ideaType, ideaText: idea, currentText, existingItems: sectionItems, mode: 'replace' }),
+        body: JSON.stringify({ section, briefType, contextText: context, currentText, existingItems: sectionItems, mode: 'replace' }),
       })
       if (res.ok) {
         const { suggestion } = await res.json()
@@ -329,7 +329,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
       const res = await fetch('/api/reload-suggestion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ section, ideaType, ideaText: idea, existingItems: sectionItems, mode: 'add' }),
+        body: JSON.stringify({ section, briefType, contextText: context, existingItems: sectionItems, mode: 'add' }),
       })
       if (res.ok) {
         const { suggestion } = await res.json()
@@ -426,7 +426,7 @@ export default function OutputPanel({ output, loading, ideaType, idea }: OutputP
         </div>
         <p className="text-sm font-medium text-gray-700 mb-1">Your execution plan will appear here</p>
         <p className="text-xs text-gray-400 max-w-xs leading-relaxed">
-          Enter an idea on the left and click "Generate First Move" to get a structured brief in seconds.
+          Describe the situation on the left and click "Generate First Move" to get a structured brief in seconds.
         </p>
       </div>
     )
@@ -898,7 +898,7 @@ function Card({ icon, title, action, children }: { icon: React.ReactNode; title:
 // --- Loading Skeleton ---
 
 const SKELETON_STAGES = [
-  { label: 'Analyzing your idea…', cardIdx: -1 },
+  { label: 'Analyzing the situation…', cardIdx: -1 },
   { label: 'Framing the core problem…', cardIdx: 0 },
   { label: 'Planning your first moves…', cardIdx: 1 },
   { label: 'Mapping next steps…', cardIdx: 2 },

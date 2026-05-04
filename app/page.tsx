@@ -4,24 +4,24 @@ import { useState } from 'react'
 import InputPanel from '@/components/InputPanel'
 import OutputPanel from '@/components/OutputPanel'
 import SignalPanel from '@/components/SignalPanel'
-import { BriefOutput, IdeaType } from '@/lib/types'
+import { BriefOutput, BriefType } from '@/lib/types'
 
 const GITHUB_REPO_URL = 'https://github.com/jzg00/FirstMove'
 
 export default function Home() {
-  const [idea, setIdea] = useState('')
-  const [ideaType, setIdeaType] = useState<IdeaType>('product')
+  const [context, setContext] = useState('')
+  const [briefType, setBriefType] = useState<BriefType>('product')
   const [output, setOutput] = useState<BriefOutput | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [prefilledContext, setPrefilledContext] = useState<string | null>(null)
 
-  function handleDraftBrief(context: string) {
-    setPrefilledContext(context)
+  function handleDraftBrief(signalContext: string) {
+    setPrefilledContext(signalContext)
   }
 
   async function handleGenerate() {
-    if (!idea.trim()) return
+    if (!context.trim()) return
     setLoading(true)
     setError(null)
 
@@ -29,7 +29,7 @@ export default function Home() {
       const res = await fetch('/api/generate-brief', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idea, ideaType }),
+        body: JSON.stringify({ context, briefType }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -133,19 +133,19 @@ export default function Home() {
           {/* Left */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
             <InputPanel
-              idea={idea}
-              ideaType={ideaType}
+              context={context}
+              briefType={briefType}
               loading={loading}
               prefilledContext={prefilledContext}
-              onIdeaChange={setIdea}
-              onTypeChange={setIdeaType}
+              onContextChange={setContext}
+              onTypeChange={setBriefType}
               onSubmit={handleGenerate}
             />
           </div>
 
           {/* Right */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm min-h-[500px]">
-            <OutputPanel output={output} loading={loading} ideaType={ideaType} idea={idea} />
+            <OutputPanel output={output} loading={loading} briefType={briefType} context={context} />
           </div>
         </div>
       </main>

@@ -1,4 +1,4 @@
-export type IdeaType = 'product' | 'operations' | 'workflow'
+export type BriefType = 'product' | 'operations' | 'workflow'
 
 export interface BriefOutput {
   coreProblem: string
