@@ -137,7 +137,7 @@ export default function Home() {
               <span className="font-bold text-gray-900 text-sm tracking-tight">FirstMove</span>
             </div>
             <p className="pointer-events-none absolute left-1/2 top-1/2 hidden max-w-[min(28rem,calc(100%-11rem))] -translate-x-1/2 -translate-y-1/2 text-center text-xs text-gray-400 sm:block">
-              Turn operational signals into decisions — before they become crises.
+              Turn operational signals into actions — before they become crises.
             </p>
             <div className="relative z-10 flex items-center gap-4">
               <span className="inline-flex items-center gap-1 rounded-full bg-sage-50 border border-sage-200 px-2.5 py-0.5 text-[11px] font-semibold text-sage-700">
